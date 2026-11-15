@@ -1,0 +1,8 @@
+{
+  "name": "BOY vs GIRL – LIVE ARENA",
+  "description": "Game đối kháng 3D tương tác TikTok LIVE: kiến trúc Unity 6 C#, LiveBridge WebSocket + SQLite, bảng điều khiển Admin 14 trang và sân đấu 3D WebGL thời gian thực.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
