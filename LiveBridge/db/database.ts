@@ -161,7 +161,7 @@ export const DEFAULT_GIFT_RULES: GiftRule[] = [
 
 export const DEFAULT_SETTINGS: AllSettings = {
   team: {
-    basePower: 100,
+    basePower: 0,
     maxPower: 5000,
     chatPowerReward: 15,
     chatCooldownSec: 2,
@@ -517,9 +517,23 @@ export class ArenaDatabase {
 
     if (existingSettings.cnt === 0) {
       this.saveAllSettings(DEFAULT_SETTINGS);
+      this.db
+        .prepare('INSERT OR IGNORE INTO Settings (key, valueJson, updatedAt) VALUES (?, ?, ?)')
+        .run('pk_zero_init_v1', '1', Date.now());
     } else {
-      // Sanitize any stale legacy settings so ClassicPush + 1-2m match rules apply cleanly
-      this.saveAllSettings(this.getAllSettings());
+      const migratedZero = this.db
+        .prepare('SELECT key FROM Settings WHERE key = ?')
+        .get('pk_zero_init_v1');
+      const current = this.getAllSettings();
+      if (!migratedZero) {
+        current.team.basePower = 0;
+        this.saveAllSettings(current);
+        this.db
+          .prepare('INSERT OR IGNORE INTO Settings (key, valueJson, updatedAt) VALUES (?, ?, ?)')
+          .run('pk_zero_init_v1', '1', Date.now());
+      } else {
+        this.saveAllSettings(current);
+      }
     }
 
     const insertGiftIgnore = this.db.prepare(`
@@ -558,7 +572,7 @@ export class ArenaDatabase {
 
     return {
       team: {
-        basePower: Number(rawTeam.basePower ?? DEFAULT_SETTINGS.team.basePower),
+        basePower: Math.max(0, Number(rawTeam.basePower ?? DEFAULT_SETTINGS.team.basePower)),
         maxPower: Math.max(500, Number(rawTeam.maxPower ?? DEFAULT_SETTINGS.team.maxPower)),
         chatPowerReward: Math.max(1, Number(rawTeam.chatPowerReward ?? DEFAULT_SETTINGS.team.chatPowerReward)),
         chatCooldownSec: Math.max(0, Number(rawTeam.chatCooldownSec ?? DEFAULT_SETTINGS.team.chatCooldownSec)),
@@ -614,7 +628,7 @@ export class ArenaDatabase {
   public saveAllSettings(settings: AllSettings): void {
     const sanitized: AllSettings = {
       team: {
-        basePower: Math.max(10, Number(settings.team?.basePower ?? DEFAULT_SETTINGS.team.basePower)),
+        basePower: Math.max(0, Number(settings.team?.basePower ?? DEFAULT_SETTINGS.team.basePower)),
         maxPower: Math.max(500, Number(settings.team?.maxPower ?? DEFAULT_SETTINGS.team.maxPower)),
         chatPowerReward: Math.max(1, Number(settings.team?.chatPowerReward ?? DEFAULT_SETTINGS.team.chatPowerReward)),
         chatCooldownSec: Math.max(0, Number(settings.team?.chatCooldownSec ?? DEFAULT_SETTINGS.team.chatCooldownSec)),

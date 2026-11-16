@@ -56,7 +56,11 @@ test('2. Direct linear power math and comeback counter-push work without hidden 
   const t0 = Date.now() + 5000;
   for (let i = 0; i < 40; i++) engine.step(0.1, Date.now() + i * 100);
 
-  // Chat BOY (+15) + Gift Sư Tử 5879 (+600) => totalPower = 100 + 15 + 600 = 715
+  const startSnap = engine.getSnapshot(t0);
+  assert.equal(startSnap.boy.totalPower, 0, 'PK bar must start at 0 for BOY');
+  assert.equal(startSnap.girl.totalPower, 0, 'PK bar must start at 0 for GIRL');
+
+  // Chat BOY (+15) + Gift Sư Tử 5879 (+600) => totalPower = 0 + 15 + 600 = 615
   engine.ingestRawEvent({
     eventType: 'Chat',
     senderId: 'b1',
@@ -75,10 +79,10 @@ test('2. Direct linear power math and comeback counter-push work without hidden 
   const midSnap = engine.getSnapshot(t0 + 1000);
   assert.equal(midSnap.boy.chatPower, 15);
   assert.equal(midSnap.boy.giftPower, 600);
-  assert.equal(midSnap.boy.totalPower, 715);
+  assert.equal(midSnap.boy.totalPower, 615);
   assert.ok(midSnap.boy.totalPower > midSnap.girl.totalPower);
 
-  // GIRL counter-pushes with Thiên Hà (galaxy_1000 = +1000) -> 1100 totalPower
+  // GIRL counter-pushes with Thiên Hà (galaxy_1000 = +1000) -> 1000 totalPower
   engine.ingestRawEvent({
     eventType: 'Gift',
     senderId: 'g1',
@@ -90,7 +94,7 @@ test('2. Direct linear power math and comeback counter-push work without hidden 
   for (let i = 0; i < 30; i++) engine.step(0.05, t0 + 2000 + i * 50);
   const afterSnap = engine.getSnapshot(t0 + 3500);
   assert.equal(afterSnap.girl.giftPower, 1000);
-  assert.equal(afterSnap.girl.totalPower, 1100);
+  assert.equal(afterSnap.girl.totalPower, 1000);
   assert.ok(afterSnap.girl.totalPower > afterSnap.boy.totalPower, 'Girl comeback should overtake Boy cleanly');
   db.close();
 });
@@ -197,7 +201,7 @@ test('5. SQLite Database Backup, JSON Recovery, and ClassicPush settings clampin
 
   const restored = db.restoreFromJsonBackup(backupInfo.jsonBackupFile);
   assert.equal(restored.restored, true);
-  assert.equal(db.getAllSettings().team.basePower, 100);
+  assert.equal(db.getAllSettings().team.basePower, 0);
   assert.equal(db.getAllSettings().match.matchDurationSec, 90);
   assert.equal(db.verifyIntegrity().ok, true);
   db.close();

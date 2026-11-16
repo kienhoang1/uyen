@@ -26,7 +26,7 @@ const INITIAL_SNAPSHOT: MatchStateSnapshot = {
     positionX: -0.75,
     velocityX: 0,
     state: 'Idle',
-    totalPower: 100,
+    totalPower: 0,
     chatPower: 0,
     giftPower: 0,
     leanAngleDeg: 0,
@@ -37,7 +37,7 @@ const INITIAL_SNAPSHOT: MatchStateSnapshot = {
     positionX: 0.75,
     velocityX: 0,
     state: 'Idle',
-    totalPower: 100,
+    totalPower: 0,
     chatPower: 0,
     giftPower: 0,
     leanAngleDeg: 0,
@@ -75,7 +75,7 @@ const INITIAL_SNAPSHOT: MatchStateSnapshot = {
 
 const INITIAL_SETTINGS: AllSettings = {
   team: {
-    basePower: 100,
+    basePower: 0,
     maxPower: 5000,
     chatPowerReward: 15,
     chatCooldownSec: 2,

@@ -49,8 +49,11 @@ export const LivestreamPortraitView: React.FC<LivestreamPortraitViewProps> = ({
   onFpsSample,
   fullscreen = false,
 }) => {
-  const totalPowerSum = Math.max(1, snapshot.boy.totalPower + snapshot.girl.totalPower);
-  const boySharePct = Math.max(14, Math.min(86, Math.round((snapshot.boy.totalPower / totalPowerSum) * 100)));
+  const totalPowerSum = snapshot.boy.totalPower + snapshot.girl.totalPower;
+  const boySharePct =
+    totalPowerSum === 0 || snapshot.boy.totalPower === snapshot.girl.totalPower
+      ? 50
+      : Math.max(14, Math.min(86, Math.round((snapshot.boy.totalPower / totalPowerSum) * 100)));
   const girlSharePct = 100 - boySharePct;
 
   const timeMin = Math.floor(snapshot.phaseRemainingSec / 60);
